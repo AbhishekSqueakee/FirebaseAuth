@@ -8,12 +8,16 @@
 import Resolver
 
 @MainActor
-extension AppResolver: ResolverRegistering {
+class AppResolver: ResolverRegistering {
     public static func registerAllServices() {
-        register { FirebaseAuthAPI() as AuthAPI }
-        register { KeychainTokenStore() as TokenStore }
-        register { AuthRepositoryImpl(api: resolve(), tokenStore: resolve()) as AuthRepository }
-        register { LoginUseCaseImpl(repo: resolve()) as LoginUseCase }
-        register { LoginViewModel() }
+        Resolver.register { FirebaseAuthAPI() as AuthAPI }
+        Resolver.register { KeychainUserStore() as UserStore }
+        Resolver.register { AuthRepositoryImpl(api: Resolver.resolve(), userStore: Resolver.resolve()) as AuthRepository }
+        Resolver.register { LoginUseCaseImpl(repo: Resolver.resolve()) as LoginUseCase }
+        Resolver.register { RegistrationUseCaseImpl(repo: Resolver.resolve()) as RegistrationUseCase }
+        Resolver.register { DashboardUseCaseImpl(repo: Resolver.resolve()) as DashboardUseCase }
+        Resolver.register { LoginViewModel() }
+        Resolver.register { RegistrationViewModel() }
+        Resolver.register { DashboardViewModel() }
     }
 }

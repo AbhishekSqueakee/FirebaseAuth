@@ -6,15 +6,20 @@
 //
 
 import SwiftUI
+import FirebaseCore
+import AppIntents
 
 @main
 struct PracticeProject1App: App {
-    let persistenceController = PersistenceController.shared
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
+    init() {
+        AppResolver.registerAllServices()
+    }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            RootView()
         }
     }
 }

@@ -6,20 +6,42 @@
 //
 
 import Foundation
+import FirebaseAuth
+
 protocol AuthAPI {
-    func login(email: String, password: String) async throws -> AuthResponse
+    func login(email: String, password: String) async throws -> User
+    func register(email: String, password: String) async throws -> User
+    func logout() throws
+    func getCurrentUser() async throws -> User?
 }
 
-class AuthAPIImpl: AuthAPI {
-    func login(email: String, password: String) async throws -> AuthResponse {
-        let url = URL(string: "https://api.example.com/login")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.httpBody = try JSONEncoder().encode(["email": email, "password": password])
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+class FirebaseAuthAPI: AuthAPI {
+    func login(email: String, password: String) async throws -> User {
+        let result = try await Auth.auth().signIn(withEmail: email, password: password)
+        let firebaseUser = result.user
 
-        let (data, _) = try await URLSession.shared.data(for: request)
-        return try JSONDecoder().decode(AuthResponse.self, from: data)
+        return User(id: firebaseUser.uid, email: firebaseUser.email ?? "", name: "")
+    }
+
+    func register(email: String, password: String) async throws -> User {
+        let result = try await Auth.auth().createUser(withEmail: email, password: password)
+        let firebaseUser = result.user
+
+        return User(id: firebaseUser.uid, email: firebaseUser.email ?? "", name: "")
+    }
+
+    func logout() throws {
+        try Auth.auth().signOut()
+    }
+
+    func getCurrentUser() async throws -> User? {
+        guard let firebaseUser = Auth.auth().currentUser else { return nil }
+
+        return User(
+            id: firebaseUser.uid,
+            email: firebaseUser.email ?? "",
+            name: firebaseUser.displayName ?? ""
+        )
     }
 }
 
